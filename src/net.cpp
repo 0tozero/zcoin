@@ -100,7 +100,7 @@ const static std::string NET_MESSAGE_COMMAND_OTHER = "*other*";
 // All transactions embargoed by dandelion.
 std::map<uint256, int64_t> CNode::mDandelionEmbargo;
 
-// Inbound connections. Transactions from each connection 
+// Inbound connections. Transactions from each connection
 // are broadcast to one of 2 dandelion destinations.
 std::vector<CNode*> CNode::vDandelionInbound;
 
@@ -115,7 +115,7 @@ std::map<CNode*, CNode*> CNode::mDandelionRoutes;
 CNode* CNode::localDandelionDestination = nullptr;
 CThreadInterrupt CNode::interruptNet;
 
-// All txn are put in the stempool in stem phase. 
+// All txn are put in the stempool in stem phase.
 // After getting relayed they are moved to mempool.
 extern CTxMemPool stempool;
 
@@ -1153,7 +1153,7 @@ static void AcceptConnection(const ListenSocket &hListenSocket) {
         if (pto != nullptr) {
             CNode::mDandelionRoutes.insert(std::make_pair(pnode, pto));
         }
-        LogPrintf("Added inbound Dandelion connection:\n%s", 
+        LogPrintf("Added inbound Dandelion connection:\n%s",
                   CNode::GetDandelionRoutingDataDebugString());
     }
 }
@@ -1236,9 +1236,9 @@ void CNode::CloseDandelionConnections(const CNode* const pnode)
     if (localDandelionDestination == pnode) {
         localDandelionDestination = newPto;
     }
-    
+
     // Dandelion debug message
-    LogPrintf("After closing Dandelion connections:\n%s", 
+    LogPrintf("After closing Dandelion connections:\n%s",
               CNode::GetDandelionRoutingDataDebugString());
 }
 
@@ -1296,8 +1296,8 @@ void ThreadSocketHandler() {
                         // Dandelion: close connection
                         CNode::CloseDandelionConnections(pnode);
                         //LogPrint(
-                        //    "dandelion", 
-                        //    "Removed Dandelion connection:\n%s", 
+                        //    "dandelion",
+                        //    "Removed Dandelion connection:\n%s",
                         //    CNode::GetDandelionRoutingDataDebugString());
                         vNodesDisconnected.remove(pnode);
                         delete pnode;
@@ -1783,9 +1783,9 @@ void ThreadOpenConnections() {
         //  * Increase the number of connectable addresses in the tried table.
         //
         // Method:
-        //  * Choose a random address from new and attempt to connect to it if we can connect 
+        //  * Choose a random address from new and attempt to connect to it if we can connect
         //    successfully it is added to tried.
-        //  * Start attempting feeler connections only after node finishes making outbound 
+        //  * Start attempting feeler connections only after node finishes making outbound
         //    connections.
         //  * Only make a feeler connection once every few minutes.
         //
@@ -1934,11 +1934,11 @@ void ThreadOpenAddedConnections() {
 
 // If successful, this moves the passed grant to the constructed node.
 bool OpenNetworkConnection(
-        const CAddress &addrConnect, 
-        bool fCountFailure, 
+        const CAddress &addrConnect,
+        bool fCountFailure,
         CSemaphoreGrant *grantOutbound,
-        const char *pszDest, 
-        bool fOneShot, 
+        const char *pszDest,
+        bool fOneShot,
         bool fFeeler) {
     //
     // Initiate outbound network connection
@@ -1965,7 +1965,7 @@ bool OpenNetworkConnection(
     if (fFeeler)
         pnode->fFeeler = true;
 
-    // Martun: if dandelion is enabled, then send a special transaction 
+    // Martun: if dandelion is enabled, then send a special transaction
     // to the new peer to check, if the peer supports dandelion or not.
     if (GetBoolArg("-dandelion", true)) {
         LOCK(cs_vNodes);
@@ -1974,7 +1974,7 @@ bool OpenNetworkConnection(
         if (CNode::vDandelionDestination.size() < DANDELION_MAX_DESTINATIONS) {
             CNode::vDandelionDestination.push_back(pnode);
         }
-        //LogPrintf("Added outbound Dandelion connection:\n%s", 
+        //LogPrintf("Added outbound Dandelion connection:\n%s",
         //          CNode::GetDandelionRoutingDataDebugString());
         // Dandelion service discovery
         uint256 dummyHash;
@@ -2193,7 +2193,7 @@ void static Discover(boost::thread_group &threadGroup) {
 void CNode::DandelionShuffle() {
     // Dandelion debug message
     LogPrintf(
-        "Before Dandelion shuffle:\n%s", 
+        "Before Dandelion shuffle:\n%s",
         CNode::GetDandelionRoutingDataDebugString());
     {
         // Lock node pointers
@@ -2228,7 +2228,7 @@ void CNode::DandelionShuffle() {
             // if there are that many to choose from.
             FastRandomContext rng;
             while (vDandelionDestination.size() < DANDELION_MAX_DESTINATIONS &&
-                   vDandelionDestination.size() < vDandelionOutbound.size() && 
+                   vDandelionDestination.size() < vDandelionOutbound.size() &&
                    candidateDestinations.size() > 0) {
                 int rand_index = rng.randrange(candidateDestinations.size());
                 vDandelionDestination.push_back(candidateDestinations[rand_index]);
@@ -2248,14 +2248,14 @@ void CNode::DandelionShuffle() {
 
     // Dandelion debug message
     LogPrintf(
-        "After Dandelion shuffle:\n%s", 
+        "After Dandelion shuffle:\n%s",
         CNode::GetDandelionRoutingDataDebugString());
 }
 
 void ThreadDandelionShuffle() {
-    LogPrintf("Started Dandelion shuffle thread.\n"); 
- 
-    int64_t nNextDandelionShuffle = 0;    
+    LogPrintf("Started Dandelion shuffle thread.\n");
+
+    int64_t nNextDandelionShuffle = 0;
     while (!CNode::interruptNet) {
         if (GetTimeMicros() > nNextDandelionShuffle) {
             CNode::DandelionShuffle();
@@ -2430,8 +2430,8 @@ CNode* CNode::getDandelionDestination(CNode* pfrom) {
     if (newPto != nullptr) {
         mDandelionRoutes.insert(std::make_pair(pfrom, newPto));
         //LogPrint(
-        //    "dandelion", 
-        //    "Added Dandelion route:\n%s", 
+        //    "dandelion",
+        //    "Added Dandelion route:\n%s",
         //    CNode::GetDandelionRoutingDataDebugString());
     }
     return newPto;
@@ -2440,11 +2440,11 @@ CNode* CNode::getDandelionDestination(CNode* pfrom) {
 void CNode::RelayDandelionTransaction(const CTransaction& tx, CNode* pfrom)
 {
     if (!stempool.exists(tx.GetHash())) {
-        LogPrintf("ERROR: Trying to relay dandelion transaction %s which is not in the stempool.\n", 
+        LogPrintf("ERROR: Trying to relay dandelion transaction %s which is not in the stempool.\n",
                   tx.GetHash().ToString());
-        return; 
+        return;
     }
-    FastRandomContext rng; 
+    FastRandomContext rng;
     if (rng.randrange(100) < DANDELION_FLUFF) {
         // Start fluffing current transaction.
 
@@ -2456,18 +2456,18 @@ void CNode::RelayDandelionTransaction(const CTransaction& tx, CNode* pfrom)
         AcceptToMemoryPool(
             mempool,
             state,
-            *ptx, 
+            *ptx,
             true, // fCheckInputs
             true, // fLimitFree
             &fMissingInputs, // pfMissingInputs
             /*&lRemovedTxn, */
             false, /* fOverrideMempoolLimit */
             0, /* nAbsurdFee */
-            false /*isCheckWalletTransaction*/ 
+            false /*isCheckWalletTransaction*/
             );
         //LogPrint(
         //    "mempool", "AcceptToMemoryPool: peer=%d: accepted %s (poolsz %u txn, %u kB)\n",
-        //    pfrom->GetId(), tx.GetHash().ToString(), 
+        //    pfrom->GetId(), tx.GetHash().ToString(),
         //    mempool.size(), mempool.DynamicMemoryUsage() / 1000);
         RelayTransaction(tx);
     } else {
@@ -2477,8 +2477,8 @@ void CNode::RelayDandelionTransaction(const CTransaction& tx, CNode* pfrom)
         if (destination!=nullptr) {
             destination->PushInventory(inv);
         }
-        //LogPrint("dandelion", "Dandelion stem, relaying transaction %s to destination %s \n", 
-        //    tx.GetHash().ToString(), 
+        //LogPrint("dandelion", "Dandelion stem, relaying transaction %s to destination %s \n",
+        //    tx.GetHash().ToString(),
         //    destination==nullptr?"nullptr":destination->addrName);
     }
 }
@@ -2490,14 +2490,14 @@ void CNode::CheckDandelionEmbargoes()
         // If we got the embargoed transaction back, erase it.
         if (mempool.exists(iter->first)) {
             //LogPrintf(
-            //    "Embargoed dandeliontx %s found in mempool; removing from embargo map.\n", 
+            //    "Embargoed dandeliontx %s found in mempool; removing from embargo map.\n",
             //    iter->first.ToString());
             iter = mDandelionEmbargo.erase(iter);
         } else if (iter->second < nCurrTime) {
-            // Embargo time is over, we did not "see" the transaction back in fluff phase, 
+            // Embargo time is over, we did not "see" the transaction back in fluff phase,
             // so start fluffing/relaying it.
             //LogPrintf(
-            //    "dandeliontx %s embargo expired\n", 
+            //    "dandeliontx %s embargo expired\n",
             //    iter->first.ToString());
             CValidationState state;
             shared_ptr<const CTransaction> ptx = stempool.get(iter->first);
@@ -2505,7 +2505,7 @@ void CNode::CheckDandelionEmbargoes()
             // Keep it embargoed for now.
             if (!ptx) {
                 //LogPrintf(
-                //    "ERROR: dandeliontx %s embargo expired, but not found in stempool.\n", 
+                //    "ERROR: dandeliontx %s embargo expired, but not found in stempool.\n",
                 //    iter->first.ToString());
                 iter = mDandelionEmbargo.erase(iter);
                 continue;
@@ -2515,18 +2515,18 @@ void CNode::CheckDandelionEmbargoes()
             AcceptToMemoryPool(
                 mempool,
                 state,
-                *ptx, 
+                *ptx,
                 true, // fCheckInputs
                 true, // fLimitFree
                 &fMissingInputs,
                 /*&lRemovedTxn, */
                 false, /* fOverrideMempoolLimit */
                 0, /* nAbsurdFee */
-                false /*isCheckWalletTransaction*/ 
+                false /*isCheckWalletTransaction*/
                 );
             LogPrintf("AcceptToMemoryPool: accepted %s (poolsz %u txn, %u kB)\n",
-                      iter->first.ToString(), 
-                      mempool.size(), 
+                      iter->first.ToString(),
+                      mempool.size(),
                       mempool.DynamicMemoryUsage() / 1000);
             RelayTransaction(*ptx);
             iter = mDandelionEmbargo.erase(iter);
@@ -3118,8 +3118,8 @@ bool CNode::localDandelionDestinationPushInventory(const CInv& inv) {
         setLocalDandelionDestination();
     }
     if (isLocalDandelionDestinationSet()) {
-        //LogPrintf("Dandelion: Pushing inventory item %s to %s.\n", 
-        //          inv.ToString(), 
+        //LogPrintf("Dandelion: Pushing inventory item %s to %s.\n",
+        //          inv.ToString(),
         //          localDandelionDestination->addrName);
         localDandelionDestination->PushInventory(inv);
         return true;
